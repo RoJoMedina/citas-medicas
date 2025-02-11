@@ -93,29 +93,101 @@ class Administrador {
 }
 
 class GestorCitas {
-    private List<Doctor> listaDoctores;
-    private List<Paciente> listaPacientes;
-    private List<Cita> listaCitas;
+    public List<Doctor> listaDoctores;
+    public List<Paciente> listaPacientes;
+    public List<Cita> listaCitas;
+    private final String directorioDB = "db/";
 
     public GestorCitas() {
         this.listaDoctores = new ArrayList<>();
         this.listaPacientes = new ArrayList<>();
         this.listaCitas = new ArrayList<>();
+        verificarCarpetaDB();
+        cargarDatos();
+    }
+
+    private void verificarCarpetaDB() {
+        File carpeta = new File(directorioDB);
+        if (!carpeta.exists()) {
+            carpeta.mkdir();
+        }
+    }
+
+    private void cargarDatos() {
+        cargarDoctores();
+        cargarPacientes();
+        cargarCitas();
+    }
+
+    private void cargarDoctores() {
+        try (BufferedReader br = new BufferedReader(new FileReader(directorioDB + "doctores.csv"))) {
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                String[] datos = linea.split(",");
+                if (datos.length == 3) {
+                    listaDoctores.add(new Doctor(datos[0], datos[1], datos[2]));
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("No se encontraron datos de doctores.");
+        }
+    }
+
+    private void cargarPacientes() {
+        try (BufferedReader br = new BufferedReader(new FileReader(directorioDB + "pacientes.csv"))) {
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                String[] datos = linea.split(",");
+                if (datos.length == 2) {
+                    listaPacientes.add(new Paciente(datos[0], datos[1]));
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("No se encontraron datos de pacientes.");
+        }
+    }
+
+    private void cargarCitas() {
+        try (BufferedReader br = new BufferedReader(new FileReader(directorioDB + "citas.csv"))) {
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                String[] datos = linea.split(",");
+                if (datos.length >= 4) {
+                    Cita cita = new Cita(datos[0], datos[1], datos[2], datos[3]);
+                    listaCitas.add(cita);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("No se encontraron datos de citas.");
+        }
     }
 
     public void registrarDoctor(Doctor doctor) {
         listaDoctores.add(doctor);
+        guardarDatos("doctores.csv", doctor.getId() + "," + doctor.getNombre() + "," + doctor.getEspecialidad());
         System.out.println("Doctor registrado con éxito.");
     }
 
     public void registrarPaciente(Paciente paciente) {
         listaPacientes.add(paciente);
+        guardarDatos("pacientes.csv", paciente.getId() + "," + paciente.getNombre());
         System.out.println("Paciente registrado con éxito.");
     }
 
     public void crearCita(Cita cita) {
         listaCitas.add(cita);
+        guardarDatos("citas.csv", cita.getDetallesCita());
         System.out.println("Cita registrada con éxito.");
+    }
+
+    private void guardarDatos(String archivo, String datos) {
+        try (FileWriter fw = new FileWriter(directorioDB + archivo, true);
+             BufferedWriter bw = new BufferedWriter(fw);
+             PrintWriter out = new PrintWriter(bw)) {
+            out.println(datos);
+        } catch (IOException e) {
+            System.out.println("Error al guardar datos en " + archivo);
+        }
     }
 
     public void asignarCita(String citaId, String doctorId, String pacienteId) {
@@ -151,5 +223,18 @@ class GestorCitas {
             if (p.getId().equals(id)) return p;
         }
         return null;
+    }
+}
+public class SistemaCitas {
+    public static void main(String[] args) {
+        GestorCitas gestor = new GestorCitas();
+
+        System.out.println("Sistema de Administración de Citas Médicas");
+        System.out.println("Cargando datos...");
+
+        // Verificación de datos cargados
+        System.out.println("Doctores cargados: " + gestor.listaDoctores.size());
+        System.out.println("Pacientes cargados: " + gestor.listaPacientes.size());
+        System.out.println("Citas cargadas: " + gestor.listaCitas.size());
     }
 }
