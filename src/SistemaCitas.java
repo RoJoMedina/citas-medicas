@@ -1,7 +1,6 @@
 import java.io.*;
 import java.util.*;
 
-// Clase Administrador (Control de acceso al sistema)
 class Administrador {
     private String usuario;
     private String contraseña;
@@ -16,7 +15,6 @@ class Administrador {
     }
 }
 
-// Clase Usuario (Clase base para Doctor y Paciente)
 abstract class Usuario {
     protected String id;
     protected String nombre;
@@ -30,7 +28,6 @@ abstract class Usuario {
     public String getNombre() { return nombre; }
 }
 
-// Clase Doctor
 class Doctor extends Usuario {
     private String especialidad;
 
@@ -42,14 +39,12 @@ class Doctor extends Usuario {
     public String getEspecialidad() { return especialidad; }
 }
 
-// Clase Paciente
 class Paciente extends Usuario {
     public Paciente(String id, String nombre) {
         super(id, nombre);
     }
 }
 
-// Clase Cita (Representa una cita médica)
 class Cita {
     private String id;
     private String fecha;
@@ -69,11 +64,11 @@ class Cita {
     public String getFecha() { return fecha; }
     public String getHora() { return hora; }
     public String getMotivo() { return motivo; }
+
     public void asignarDoctor(Doctor doctor) { this.doctor = doctor; }
     public void asignarPaciente(Paciente paciente) { this.paciente = paciente; }
 }
 
-// Clase GestorCitas (Administra los registros de doctores, pacientes y citas)
 class GestorCitas {
     public List<Doctor> listaDoctores;
     public List<Paciente> listaPacientes;
@@ -101,7 +96,6 @@ class GestorCitas {
         cargarCitas();
     }
 
-    // Registrar y guardar un doctor en doctores.csv
     public void registrarDoctor(Doctor doctor) {
         listaDoctores.add(doctor);
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(directorioDB + "doctores.csv", true))) {
@@ -114,7 +108,6 @@ class GestorCitas {
         System.out.println("Doctor registrado exitosamente.");
     }
 
-    // Registrar y guardar un paciente en pacientes.csv
     public void registrarPaciente(Paciente paciente) {
         listaPacientes.add(paciente);
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(directorioDB + "pacientes.csv", true))) {
@@ -126,7 +119,6 @@ class GestorCitas {
         System.out.println("Paciente registrado exitosamente.");
     }
 
-    // Crear y guardar una cita en citas.csv
     public void crearCita(Cita cita) {
         listaCitas.add(cita);
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(directorioDB + "citas.csv", true))) {
@@ -138,7 +130,6 @@ class GestorCitas {
         System.out.println("Cita creada exitosamente.");
     }
 
-    // Cargar doctores desde doctores.csv
     private void cargarDoctores() {
         File file = new File(directorioDB + "doctores.csv");
         if (!file.exists()) return;
@@ -156,7 +147,6 @@ class GestorCitas {
         }
     }
 
-    // Cargar pacientes desde pacientes.csv
     private void cargarPacientes() {
         File file = new File(directorioDB + "pacientes.csv");
         if (!file.exists()) return;
@@ -174,7 +164,6 @@ class GestorCitas {
         }
     }
 
-    // Cargar citas desde citas.csv
     private void cargarCitas() {
         File file = new File(directorioDB + "citas.csv");
         if (!file.exists()) return;
@@ -192,7 +181,6 @@ class GestorCitas {
         }
     }
 
-    // Menú principal
     public void mostrarMenu() {
         Scanner scanner = new Scanner(System.in);
         int opcion;
@@ -245,11 +233,27 @@ class GestorCitas {
         scanner.close();
     }
 }
-
 public class SistemaCitas {
     public static void main(String[] args) {
-        GestorCitas gestor = new GestorCitas();
-        System.out.println("Sistema de Administración de Citas Médicas");
-        gestor.mostrarMenu();
+        Scanner scanner = new Scanner(System.in);
+        // Credenciales genéricas para el administrador
+        Administrador admin = new Administrador("admin", "1234");
+
+        System.out.println("=== Acceso de Administrador ===");
+        System.out.print("Usuario: ");
+        String usuario = scanner.nextLine();
+        System.out.print("Contraseña: ");
+        String contraseña = scanner.nextLine();
+
+        if (admin.verificarCredenciales(usuario, contraseña)) {
+            System.out.println("Acceso autorizado.");
+            GestorCitas gestor = new GestorCitas();
+            System.out.println("Sistema de Administración de Citas Médicas");
+            gestor.mostrarMenu();
+        } else {
+            System.out.println("Credenciales incorrectas. Acceso denegado.");
+        }
+
+        scanner.close();
     }
 }
